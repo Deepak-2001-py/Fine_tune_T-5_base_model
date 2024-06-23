@@ -1,66 +1,106 @@
----
-license: apache-2.0
-base_model: t5-base
-tags:
-- generated_from_trainer
-model-index:
-- name: finnetuned-tf-base-model
-  results: []
----
+# Pesto Home Assignment README
 
-<!-- This model card has been generated automatically according to the information the Trainer had access to. You
-should probably proofread and complete it, then remove this comment. -->
+## Project Overview
 
-# finnetuned-tf-base-model
+This project focuses on fine-tuning a language model to generate automated responses for customer queries. The notebook demonstrates the entire process, from data preparation to model deployment using the Gradio library for creating an interactive demo.
 
-This model is a fine-tuned version of [t5-base](https://huggingface.co/t5-base) on an unknown dataset.
-It achieves the following results on the evaluation set:
-- Loss: 0.7519
+## Table of Contents
 
-## Model description
+1. [Requirements](#requirements)
+2. [Project Structure](#project-structure)
+3. [Installation](#installation)
+4. [Usage](#usage)
+5. [Fine-Tuning the Model](#fine-tuning-the-model)
+6. [Deploying with Gradio](#deploying-with-gradio)
 
-More information needed
+## Requirements
 
-## Intended uses & limitations
+- Python 3.7+
+- Jupyter Notebook or Google Colab
+- Transformers library
+- Gradio library
 
-More information needed
+## Project Structure
 
-## Training and evaluation data
+The notebook consists of the following sections:
 
-More information needed
+1. **Setup**: Importing necessary libraries and setting up the environment.
+2. **Data Preparation**: Loading and preparing the dataset.
+3. **Model Fine-Tuning**: Converting examples to features and fine-tuning the language model.
+4. **Inference**: Generating responses using the fine-tuned model.
+5. **Deployment**: Creating an interactive demo with Gradio.
 
-## Training procedure
+## Installation
 
-### Training hyperparameters
+To run this project locally, follow these steps:
 
-The following hyperparameters were used during training:
-- learning_rate: 2e-05
-- train_batch_size: 4
-- eval_batch_size: 4
-- seed: 42
-- optimizer: Adam with betas=(0.9,0.999) and epsilon=1e-08
-- lr_scheduler_type: linear
-- num_epochs: 10
+1. Clone the repository or download the notebook file.
+2. Install the required libraries:
+   ```bash
+   pip install transformers gradio
+   ```
+3. Launch Jupyter Notebook and open the downloaded notebook file.
 
-### Training results
+## Usage
 
-| Training Loss | Epoch | Step | Validation Loss |
-|:-------------:|:-----:|:----:|:---------------:|
-| No log        | 1.0   | 17   | 1.1922          |
-| No log        | 2.0   | 34   | 1.0339          |
-| No log        | 3.0   | 51   | 0.9496          |
-| No log        | 4.0   | 68   | 0.8874          |
-| No log        | 5.0   | 85   | 0.8411          |
-| No log        | 6.0   | 102  | 0.8031          |
-| No log        | 7.0   | 119  | 0.7797          |
-| No log        | 8.0   | 136  | 0.7644          |
-| No log        | 9.0   | 153  | 0.7550          |
-| No log        | 10.0  | 170  | 0.7519          |
+1. **Data Preparation**: Prepare your dataset with columns for queries and responses.
+2. **Fine-Tuning**: Run the cells in the notebook to fine-tune the model on your dataset.
+3. **Inference**: Use the fine-tuned model to generate responses for new queries.
+4. **Gradio Deployment**: Deploy the model using Gradio for an interactive web interface.
 
+## Fine-Tuning the Model
 
-### Framework versions
+The fine-tuning process involves the following steps:
 
-- Transformers 4.41.2
-- Pytorch 2.3.0+cu121
-- Datasets 2.20.0
-- Tokenizers 0.19.1
+1. **Load and Prepare Dataset**:
+   ```python
+   def convert_examples_to_features(example_batch):
+       input_encodings = tokenizer(example_batch["query"], max_length=1024, truncation=True, padding=True)
+       with tokenizer.as_target_tokenizer():
+           target_encodings = tokenizer(example_batch["response"], max_length=128, truncation=True, padding=True)
+       return {
+           "input_ids": input_encodings["input_ids"],
+           "attention_mask": input_encodings["attention_mask"],
+           "labels": target_encodings["input_ids"]
+       }
+
+   pairs = dataset.map(convert_examples_to_features, batched=True)
+   ```
+
+2. **Fine-Tuning**: Fine-tune the model using the prepared dataset.
+
+## Deploying with Gradio
+
+Create an interactive demo using Gradio:
+
+```python
+import gradio as gr
+
+def generate_response(query):
+    input = tokenizer.encode(query, return_tensors="pt")
+    output = model.generate(input, max_length=128)
+    response = tokenizer.decode(output[0], skip_special_tokens=True)
+    return response
+
+demo = gr.Blocks()
+
+with demo:
+    gr.Markdown("## Summarization and News Headline Generation Models Demo")
+    with gr.Tabs():
+        with gr.TabItem("Customer Automated Answer Generator"):
+            with gr.Row():
+                query_inputs = gr.Textbox()
+                response_outputs = gr.Textbox()
+            summary_button = gr.Button("Generate Response")
+
+    summary_button.click(generate_response, inputs=query_inputs, outputs=response_outputs)
+
+if __name__ == "__main__":
+    demo.launch()
+```
+
+This code sets up a Gradio interface where users can input a query and receive a generated response from the fine-tuned model.
+
+## Conclusion
+
+This project provides a comprehensive guide to fine-tuning a language model for generating automated responses and deploying it using Gradio for an interactive user interface. Follow the steps outlined in the notebook to replicate the process and customize it for your specific use case.
