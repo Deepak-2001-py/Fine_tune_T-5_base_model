@@ -85,7 +85,7 @@ def generate_response(query):
 demo = gr.Blocks()
 
 with demo:
-    gr.Markdown("## Summarization and News Headline Generation Models Demo")
+    gr.Markdown("## Customer Automated Answer Generator ")
     with gr.Tabs():
         with gr.TabItem("Customer Automated Answer Generator"):
             with gr.Row():
